@@ -1,10 +1,11 @@
 package handler
 
 import (
+	"goproject/src/app/model"
 	"encoding/json"
-	"goproject/app/model"
 	"net/http"
 	"strconv"
+	"goproject/src/token"
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
@@ -37,7 +38,6 @@ func CreateUser(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	}
 	respondJSON(w, http.StatusCreated, user)
 }
-
 func GetUser(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
@@ -49,7 +49,39 @@ func GetUser(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	if user == nil {
 		return
 	}
+
 	respondJSON(w, http.StatusOK, user)
+}
+
+func Login(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+
+	user := model.User{}
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&user); err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	defer r.Body.Close()
+
+	if err := db.First(&user, "Email = ? AND Password = ?", user.Email, user.Password).Error; err != nil {
+		respondError(w, http.StatusNotFound, "Kullanıcı bulunamadı")
+	} else {
+		person := getPersonOr404(db, user.PersonID, w, r)
+
+		if person != nil {
+			tokenString, err := token.GenerateToken(person)
+			if err != nil {
+				respondError(w, http.StatusNotFound, err.Error())
+				return
+			}
+			w.Header().Set("Token", tokenString)
+			respondJSON(w, http.StatusOK, person)
+		} else {
+			respondError(w, http.StatusNotFound, "Personel bulunamadı")
+		}
+	}
+
 }
 
 func UpdateUser(db *gorm.DB, w http.ResponseWriter, r *http.Request) {

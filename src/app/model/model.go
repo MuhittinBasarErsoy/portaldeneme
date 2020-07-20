@@ -28,6 +28,7 @@ type Person struct {
 	BloodType            string    `json:"BloodType"`
 	Email                string    `json:"Email"`
 	Picture              []byte    `json:"Picture"`
+	// sad
 }
 
 type Right struct {
@@ -73,8 +74,7 @@ type PersonHistory struct {
 }
 
 type PersonelInformation struct {
-	gorm.Model
-	PersonID       int       `json:"person_id"`
+	PersonID       int       `gorm:"primary_key;auto_increment:false" json:"person_id"`
 	RegisterNo     string    `json:"RegisterNo"`
 	SGKRegisterNo  string    `json:"SGKRegisterNo"`
 	SGKEnterDate   time.Time `json:"SGKEnterDate"`
@@ -183,7 +183,7 @@ func DBMigrate(db *gorm.DB) *gorm.DB {
 	db.Model(&PersonHistory{}).AddForeignKey("person_id", "people(id)", "RESTRICT", "RESTRICT")
 	db.Model(&PersonHistory{}).AddForeignKey("staff_id", "staffs(id)", "RESTRICT", "RESTRICT")
 
-	db.Model(&PersonelInformation{}).AddForeignKey("person_id", "people(id)", "RESTRICT", "RESTRICT")
+	// db.Model(&PersonelInformation{}).AddForeignKey("person_id", "people(id)", "RESTRICT", "RESTRICT")
 
 	//db.Model(&User{}).AddForeignKey("person_id", "people(id)", "RESTRICT", "RESTRICT")
 
@@ -198,7 +198,7 @@ func DBMigrate(db *gorm.DB) *gorm.DB {
 	db.Model(&Staff{}).AddForeignKey("person_id", "people(id)", "RESTRICT", "RESTRICT")
 
 	db.Model(&StaffHistory{}).AddForeignKey("title_id", "titles(id)", "RESTRICT", "RESTRICT")
-	db.Model(&StaffHistory{}).AddForeignKey("organization_id", "organizations(id)", "RESTRICT", "RESTRICT")
+	db.Model(&StaffHistory{}).AddForeignKey("organization_id", "organizations(id)", "RESTRICT", "RESTRICT") // İlk organizasyon mauel eklenecek
 	db.Model(&StaffHistory{}).AddForeignKey("staff_id", "staffs(id)", "RESTRICT", "RESTRICT")
 	db.Model(&StaffHistory{}).AddForeignKey("person_id", "people(id)", "RESTRICT", "RESTRICT")
 
